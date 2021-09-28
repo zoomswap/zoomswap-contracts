@@ -1,4 +1,6 @@
-# zoomswap farm
+# zoomswap smart contracts
+
+Smart contracts for zoomswap token and farms
 
 ## Develop
 

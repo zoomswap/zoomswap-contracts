@@ -61,10 +61,9 @@ contract MasterChef is Ownable, ReentrancyGuard {
     // Deposit Fee address
     address public feeAddress;
     // The base unit for halving (30 * 24 * 60 * 12)
-    uint256 public halvingBaseDuration; 
+    uint256 public halvingBaseDuration;
     // The total reward epochs (128)
-    uint256 public rewardEpoch; 
-
+    uint256 public rewardEpoch;
 
     event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
     event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
@@ -99,7 +98,7 @@ contract MasterChef is Ownable, ReentrancyGuard {
         if (block.number < start) {
             return 0;
         }
-        uint256 duration = halvingBaseDuration; 
+        uint256 duration = halvingBaseDuration;
         uint256 endBlock = start.add(duration.mul(rewardEpoch));
         if (block.number >= endBlock) {
             return 0;
@@ -156,10 +155,7 @@ contract MasterChef is Ownable, ReentrancyGuard {
         uint16 _depositFeeBP,
         bool _withUpdate
     ) public onlyOwner {
-        require(
-            _depositFeeBP <= 400,
-            "set: invalid deposit fee basis points"
-        );
+        require(_depositFeeBP <= 200, "set: invalid deposit fee basis points");
 
         if (_withUpdate) {
             massUpdatePools();
@@ -207,7 +203,11 @@ contract MasterChef is Ownable, ReentrancyGuard {
         }
     }
 
-    function zoomReward(uint256 lastRewardBlock, uint256 allocPoint) internal view returns (uint256) {
+    function zoomReward(uint256 lastRewardBlock, uint256 allocPoint)
+        internal
+        view
+        returns (uint256)
+    {
         uint256 reward = 0;
         if (block.number < startBlock) {
             return reward;
@@ -239,7 +239,7 @@ contract MasterChef is Ownable, ReentrancyGuard {
             zpb = zpb.div(2);
         }
         return reward.mul(allocPoint).div(totalAllocPoint);
-    } 
+    }
 
     // Update reward variables of the given pool to be up-to-date.
     function updatePool(uint256 _pid) public {
@@ -253,7 +253,7 @@ contract MasterChef is Ownable, ReentrancyGuard {
             return;
         }
         uint256 reward = zoomReward(pool.lastRewardBlock, pool.allocPoint);
-        zoom.mint(devaddr, reward.div(10));
+        zoom.mint(devaddr, reward.div(20));
         zoom.mint(address(this), reward);
         pool.accZoomPerShare = pool.accZoomPerShare.add(
             reward.mul(1e12).div(lpSupply)
@@ -268,10 +268,10 @@ contract MasterChef is Ownable, ReentrancyGuard {
         updatePool(_pid);
         if (user.amount > 0) {
             uint256 pending = user
-            .amount
-            .mul(pool.accZoomPerShare)
-            .div(1e12)
-            .sub(user.rewardDebt);
+                .amount
+                .mul(pool.accZoomPerShare)
+                .div(1e12)
+                .sub(user.rewardDebt);
             safeZoomTransfer(msg.sender, pending);
         }
 
